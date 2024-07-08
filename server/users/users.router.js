@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const users = await fetchAllUsers();
-
+  console.log(users);
   res.json(users);
 });
 

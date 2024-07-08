@@ -28,6 +28,8 @@ const Carousel = styled.div(() => ({
 const CarouselItem = styled.div(() => ({
   flex: '0 0 auto',
   scrollSnapAlign: 'start',
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 const Image = styled.img(() => ({
@@ -35,6 +37,42 @@ const Image = styled.img(() => ({
   height: 'auto',
   maxHeight: '300px',
   padding: '10px',
+}));
+
+const UserInfo = styled.div(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: '10px',
+  backgroundColor: '#f0f0f0',
+}));
+
+const UserCircle = styled.div(() => ({
+  width: '30px',
+  height: '30px',
+  borderRadius: '50%',
+  backgroundColor: '#007bff',
+  color: 'white',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: '10px',
+  fontSize: '14px',
+  fontWeight: 'bold',
+}));
+
+const UserDetails = styled.div(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const UserName = styled.span(() => ({
+  fontSize: '14px',
+  fontWeight: 'bold',
+}));
+
+const UserEmail = styled.span(() => ({
+  fontSize: '12px',
+  color: '#666',
 }));
 
 const Content = styled.div(() => ({
@@ -46,13 +84,17 @@ const Content = styled.div(() => ({
 
 const Button = styled.button(() => ({
   position: 'absolute',
-  bottom: 0,
+  top: '50%', 
+  transform: 'translateY(-50%)', 
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
   color: '#000',
   fontSize: '20px',
   cursor: 'pointer',
-  height: '50px',
+  height: '35px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 }));
 
 const PrevButton = styled(Button)`
@@ -63,36 +105,55 @@ const NextButton = styled(Button)`
   right: 10px;
 `;
 
-const Post = ({ post }) => {
+const Post = ({ post, users }) => {
   const carouselRef = useRef(null);
 
   const handleNextClick = () => {
     if (carouselRef.current) {
+      const itemWidth = carouselRef.current.offsetWidth;
       carouselRef.current.scrollBy({
-        left: 50,
+        left: itemWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+  
+  const handlePrevClick = () => {
+    if (carouselRef.current) {
+      const itemWidth = carouselRef.current.offsetWidth;
+      carouselRef.current.scrollBy({
+        left: -itemWidth,
         behavior: 'smooth',
       });
     }
   };
 
-  const handlePrevClick = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({
-        left: -70,
-        behavior: 'smooth',
-      });
-    }
+  const getInitials = (name) => {
+    const names = name.split(' ');
+    return names.length > 1
+      ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
+      : names[0][0].toUpperCase();
   };
 
   return (
     <PostContainer>
       <CarouselContainer>
         <Carousel ref={carouselRef}>
-          {post.images.map((image, index) => (
-            <CarouselItem key={index}>
-              <Image src={image.url} alt={post.title} />
-            </CarouselItem>
-          ))}
+          {post.images.map((image, index) => {
+            const user = users[index % users.length];
+            return (
+              <CarouselItem key={index}>
+                <UserInfo>
+                  <UserCircle>{getInitials(user.name)}</UserCircle>
+                  <UserDetails>
+                    <UserName>{user.name}</UserName>
+                    <UserEmail>{user.email}</UserEmail>
+                  </UserDetails>
+                </UserInfo>
+                <Image src={image.url} alt={post.title} />
+              </CarouselItem>
+            );
+          })}
         </Carousel>
         <PrevButton onClick={handlePrevClick}>&#10094;</PrevButton>
         <NextButton onClick={handleNextClick}>&#10095;</NextButton>
@@ -108,11 +169,16 @@ const Post = ({ post }) => {
 Post.propTypes = {
   post: PropTypes.shape({
     content: PropTypes.any,
-    images: PropTypes.shape({
-      map: PropTypes.func,
-    }),
-    title: PropTypes.any,
-  }),
+    images: PropTypes.arrayOf(PropTypes.shape({
+      url: PropTypes.string.isRequired,
+    })).isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+  }).isRequired,
+  users: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+  })).isRequired,
 };
 
 export default Post;

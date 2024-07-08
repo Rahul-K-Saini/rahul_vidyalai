@@ -9,7 +9,12 @@ async function fetchAllUsers() {
 }
 // Route to fetch user are https://jsonplaceholder.typicode.com/users/:userId
 async function fetchUserById(userId) {
-  return {};
+  const data = await axios.get(
+    `https://jsonplaceholder.typicode.com/users/${userId}`,
+  );
+  return {
+    data
+  };
 }
 
 module.exports = { fetchAllUsers, fetchUserById };
